@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg1: #d6f6ff;
+  --bg2: #efe8ff;
+  --bg3: #f7fdff;
+  --ink: #0f3a4a;
+  --card: rgba(255, 255, 255, 0.62);
+  --border: rgba(255, 255, 255, 0.8);
+  color-scheme: light;
+}
+.dark {
+  --bg1: #0a3347;
+  --bg2: #1a1646;
+  --bg3: #07141c;
+  --ink: #dff6ff;
+  --card: rgba(14, 40, 56, 0.6);
+  --border: rgba(120, 200, 230, 0.18);
+  color-scheme: dark;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  color: var(--ink);
+  min-height: 100dvh;
+  background:
+    radial-gradient(1100px 600px at 8% -10%, var(--bg1), transparent 70%),
+    radial-gradient(900px 600px at 100% 0%, var(--bg2), transparent 70%),
+    var(--bg3);
+  background-attachment: fixed;
+}
+
+:focus-visible { outline: 3px solid #25c6e3; outline-offset: 2px; border-radius: 8px; }
+
+@layer components {
+  .glass {
+    @apply rounded-3xl border shadow-lg shadow-aqua-900/5 backdrop-blur-xl;
+    background: var(--card);
+    border-color: var(--border);
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-semibold transition duration-200 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-aqua-500 text-white shadow-md shadow-aqua-500/30 hover:-translate-y-0.5 hover:bg-aqua-600 active:translate-y-0;
+  }
+  .btn-ghost {
+    @apply border border-aqua-300/60 bg-white/40 hover:bg-white/70 dark:border-aqua-400/30 dark:bg-white/5 dark:hover:bg-white/10;
+  }
+  .btn-danger {
+    @apply border border-rose-300/70 bg-rose-50/70 text-rose-700 hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-200;
+  }
+  .input {
+    @apply w-full rounded-2xl border border-aqua-300/60 bg-white/70 px-4 py-2.5 text-[color:var(--ink)] placeholder:text-slate-400 dark:border-aqua-400/30 dark:bg-white/5;
+  }
+  .label { @apply mb-1 block text-sm font-semibold; }
+  .muted { @apply text-sm opacity-70; }
+}
+
+@keyframes wave-x { to { transform: translateX(-100px); } }
+@keyframes wave-x-rev { from { transform: translateX(-100px); } to { transform: translateX(0); } }
+@keyframes bubble-up {
+  0% { transform: translateY(0); opacity: 0; }
+  15% { opacity: 0.7; }
+  100% { transform: translateY(-120px); opacity: 0; }
+}
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+
+.wave-fast { animation: wave-x 3.2s linear infinite; }
+.wave-slow { animation: wave-x-rev 5.5s linear infinite; }
+.bubble { animation-name: bubble-up; animation-timing-function: ease-in; animation-iteration-count: infinite; }
+.float { animation: bob 3.4s ease-in-out infinite; }
+
+.reduce-motion *, .reduce-motion *::before, .reduce-motion *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}

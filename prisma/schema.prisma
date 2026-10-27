@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// A "user" is an anonymous device identity. deviceId is a random secret generated
+// in the browser; it acts as the capability token for sync and push APIs.
+model UserPreference {
+  id             String   @id @default(cuid())
+  deviceId       String   @unique
+  timeZone       String
+  wakeMinute     Int
+  bedMinute      Int
+  intervalMin    Int
+  style          String
+  unit           String   @default("ml")
+  remindersOn    Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  goals         DailyGoal[]
+  drinks        DrinkEntry[]
+  subscriptions NotificationSubscription[]
+  schedule      ReminderSchedule?
+  earned        EarnedAchievement[]
+  streak        StreakSummary?
+}
+
+model DailyGoal {
+  id       String         @id @default(cuid())
+  userId   String
+  dayKey   String // local calendar day, YYYY-MM-DD
+  targetMl Int
+  user     UserPreference @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dayKey])
+}
+
+model DrinkEntry {
+  id         String         @id
+  userId     String
+  amountMl   Int // always integer millilitres
+  consumedAt DateTime
+  dayKey     String
+  note       String?
+  deletedAt  DateTime?
+  user       UserPreference @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, dayKey])
+}
+
+model NotificationSubscription {
+  id            String         @id @default(cuid())
+  userId        String
+  endpoint      String         @unique
+  p256dh        String
+  auth          String
+  userAgent     String?
+  failureCount  Int            @default(0)
+  lastSuccessAt DateTime?
+  createdAt     DateTime       @default(now())
+  user          UserPreference @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs          ReminderLog[]
+}
+
+model ReminderSchedule {
+  id           String         @id @default(cuid())
+  userId       String         @unique
+  enabled      Boolean        @default(true)
+  snoozeUntil  DateTime?
+  goalMl       Int            @default(2000)
+  todayDayKey  String?
+  todayTotalMl Int            @default(0)
+  lastSlotKey  String?
+  updatedAt    DateTime       @updatedAt
+  user         UserPreference @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// One row per (subscription, slot). The unique constraint makes the worker idempotent.
+model ReminderLog {
+  id             String                   @id @default(cuid())
+  subscriptionId String
+  slotKey        String
+  sentAt         DateTime                 @default(now())
+  subscription   NotificationSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriptionId, slotKey])
+}
+
+model AchievementDefinition {
+  id          String @id
+  name        String
+  description String
+  icon        String
+}
+
+model EarnedAchievement {
+  id            String         @id @default(cuid())
+  userId        String
+  achievementId String
+  earnedAt      DateTime
+  user          UserPreference @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+}
+
+model StreakSummary {
+  id        String         @id @default(cuid())
+  userId    String         @unique
+  current   Int            @default(0)
+  best      Int            @default(0)
+  updatedAt DateTime       @updatedAt
+  user      UserPreference @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

@@ -1,0 +1,50 @@
+AQUABUDDY: HOW TO RUN (quick version)
+=====================================
+Requirements: Node.js 20 or newer (22 recommended) and npm.
+
+1. Install dependencies
+   npm install
+
+2. Create your environment file
+   macOS / Linux / Git Bash:   cp .env.example .env
+   Windows PowerShell:         copy .env.example .env
+   Windows cmd.exe:            copy .env.example .env
+
+3. Set up the database (creates prisma/dev.db, applies migrations, seeds badges)
+   npm run setup
+   (If it asks for a migration name, press Enter. The first run generates the migration in prisma/migrations.)
+
+4. Start the app
+   npm run dev
+   Open http://localhost:3000
+
+5. Run the tests
+   npm test
+
+OPTIONAL: BACKGROUND REMINDERS (Web Push)
+-----------------------------------------
+Reminders already work while AquaBuddy is open, with no setup. To get reminders
+when the site is CLOSED you need Web Push plus a worker:
+
+   npm run vapid                  -> prints a key pair; paste the 3 lines into .env
+   (also set CRON_SECRET in .env to a long random string)
+   npm run dev                    -> restart so the new env is loaded
+   npm run worker                 -> second terminal; runs the reminder job every 60 s
+   In the app: Settings -> Notifications -> allow notifications -> turn on "Background reminders".
+
+Web Push needs HTTPS in production (http://localhost is allowed for development).
+On iPhone/iPad, install the app to the Home Screen first.
+
+HANDY COMMANDS
+--------------
+   npm run typecheck     TypeScript check
+   npm run build         production build
+   npm start             run the production build
+   npx prisma studio     browse the database
+   npm run db:seed       re-seed badge definitions
+
+TROUBLESHOOTING
+---------------
+   "Environment variable not found: DATABASE_URL"  -> you skipped step 2.
+   Notifications button is disabled                -> permission was blocked; reset it in browser site settings.
+   Fonts fail to load at build time                -> the build needs internet access once (next/font downloads Google Fonts).
